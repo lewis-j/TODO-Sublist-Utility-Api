@@ -1,10 +1,10 @@
 [build]
+  command = "npm install && npm run build"
   functions = "functions"
   publish = "public"
 
-[dev]
-  publish = "public"
-  port = 8888
+[functions]
+  directory = "functions"
 
 [[redirects]]
   from = "/api/*"
