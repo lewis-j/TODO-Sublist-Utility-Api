@@ -1,0 +1,14 @@
+# Dependencies
+node_modules/
+
+# Logs
+npm-debug.log*
+
+# Environment variables
+.env
+
+# Mac files
+.DS_Store
+
+# Netlify
+.netlify
