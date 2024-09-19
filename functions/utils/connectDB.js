@@ -8,10 +8,13 @@ const connectDB = async () => {
     return;
   }
 
+  if (!process.env.MONGODB_DATABASE) {
+    throw new Error("MONGODB_DATABASE environment variable is not defined");
+  }
+
   try {
     const db = await mongoose.connect(process.env.MONGODB_DATABASE, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
+      // Remove deprecated options
       serverSelectionTimeoutMS: 5000,
       socketTimeoutMS: 45000,
     });
