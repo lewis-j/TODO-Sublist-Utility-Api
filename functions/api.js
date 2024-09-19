@@ -3,6 +3,7 @@ const serverless = require("serverless-http");
 const mongoose = require("mongoose");
 const session = require("express-session");
 const cors = require("cors");
+const connectDB = require("./utils/connectDB");
 const dotenv = require("dotenv");
 dotenv.config();
 require("isomorphic-fetch");
@@ -40,14 +41,7 @@ app.use(
 );
 
 // Connect to MongoDB
-const mongoDbUrl = process.env.MONGODB_DATABASE;
-mongoose
-  .connect(mongoDbUrl)
-  .then(() => console.log("Connected to MongoDB"))
-  .catch((err) => {
-    console.error("Could not connect to MongoDB", err);
-    process.exit(1);
-  });
+connectDB();
 
 // Use route files
 app.use("/.netlify/functions/api/auth", authRoutes);
