@@ -1,6 +1,8 @@
 const express = require("express");
 const msal = require("@azure/msal-node");
 const router = express.Router();
+const dotenv = require("dotenv");
+dotenv.config();
 
 // MSAL configuration
 const msalConfig = {
