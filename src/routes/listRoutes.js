@@ -139,6 +139,7 @@ router.get("/todo/lists", isMicrosoftAuthenticated, async (req, res) => {
     });
 
     const result = await client.api("/me/todo/lists").get();
+    console.log("microsoft results", result);
 
     res.json(result.value);
   } catch (error) {
