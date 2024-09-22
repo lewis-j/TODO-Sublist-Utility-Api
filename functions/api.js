@@ -19,6 +19,9 @@ app.use(
       const allowedOrigins = [
         "https://mtodo-utility.netlify.app",
         "https://mtodo-utility.netlify.app/",
+        "https://todo-utility.netlify.app",
+        "https://todo-utility.netlify.app/",
+        "http://localhost:5173",
         // Include your local development URL if needed
         "http://localhost:5173",
       ];
