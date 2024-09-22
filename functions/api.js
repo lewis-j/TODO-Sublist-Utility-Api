@@ -44,7 +44,7 @@ app.use(
 connectDB();
 
 // Use route files
-app.use("/.netlify/functions/api/auth", authRoutes);
-app.use("/.netlify/functions/api", listRoutes);
+app.use("/auth", authRoutes);
+app.use("/", listRoutes);
 
 module.exports.handler = serverless(app);

@@ -39,7 +39,7 @@ mongoose
 
 // Use route files
 app.use("/auth", authRoutes);
-app.use("/api", listRoutes);
+app.use("/", listRoutes);
 
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
