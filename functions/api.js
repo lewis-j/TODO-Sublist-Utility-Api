@@ -18,12 +18,10 @@ app.use(
     origin: (origin, callback) => {
       const allowedOrigins = [
         "https://mtodo-utility.netlify.app",
-        "https://mtodo-utility.netlify.app/",
         "https://todo-utility.netlify.app",
-        "https://todo-utility.netlify.app/",
+        "https://deploy-preview-*.netlify.app",
         "http://localhost:5173",
-        // Include your local development URL if needed
-        "http://localhost:5173",
+        "https://your-site-name.netlify.app", // Replace with your actual Netlify domain
       ];
       if (!origin || allowedOrigins.indexOf(origin) !== -1) {
         callback(null, true);
@@ -49,5 +47,8 @@ connectDB();
 // Use route files
 app.use("/auth", authRoutes);
 app.use("/", listRoutes);
+app.use("/test", (req, res) => {
+  res.json({ message: "Hello World" });
+});
 
 module.exports.handler = serverless(app);
