@@ -1,32 +1,16 @@
 {
-  "name": "sublist",
+  "name": "netlify-express-test",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Simple Express app for Netlify",
+  "main": "functions/api.js",
   "scripts": {
-    "dev": "nodemon index.js",
-    "build": "npm install",
-    "start": "node index.js",
-    "deploy": "netlify deploy"
+    "start": "netlify dev"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "dependencies": {
-    "@azure/msal-node": "^2.13.1",
-    "@microsoft/microsoft-graph-client": "^3.0.7",
-    "body-parser": "^1.20.2",
-    "cors": "^2.8.5",
-    "dotenv": "^16.4.5",
-    "express": "^4.19.2",
-    "express-session": "^1.18.0",
-    "isomorphic-fetch": "^3.0.0",
-    "mongoose": "^8.6.1",
-    "nodemon": "^3.1.4",
-    "serverless-http": "^3.2.0"
+    "express": "^4.17.1",
+    "serverless-http": "^2.7.0"
   },
   "devDependencies": {
-    "@netlify/functions": "^2.8.1",
-    "netlify-cli": "^17.36.0"
+    "netlify-cli": "^3.39.0"
   }
 }
