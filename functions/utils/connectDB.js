@@ -1,27 +1,17 @@
 const mongoose = require("mongoose");
 
-let isConnected = false;
-
 const connectDB = async () => {
-  if (isConnected) {
-    console.log("Using existing database connection");
-    return;
-  }
-
-  if (!process.env.MONGODB_DATABASE) {
-    throw new Error("MONGODB_DATABASE environment variable is not defined");
-  }
-
   try {
-    const db = await mongoose.connect(process.env.MONGODB_DATABASE, {
-      // Remove deprecated options
-      serverSelectionTimeoutMS: 5000,
-      socketTimeoutMS: 45000,
+    await mongoose.connect(process.env.MONGODB_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      serverSelectionTimeoutMS: 5000, // Timeout after 5s instead of 30s
+      socketTimeoutMS: 45000, // Close sockets after 45 seconds of inactivity
     });
-    isConnected = db.connections[0].readyState;
     console.log("MongoDB connected successfully");
   } catch (error) {
     console.error("MongoDB connection error:", error);
+    console.error("Error details:", JSON.stringify(error, null, 2));
     process.exit(1);
   }
 };
