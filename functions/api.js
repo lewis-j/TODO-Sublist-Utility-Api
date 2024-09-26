@@ -42,13 +42,13 @@ app.use(
 );
 
 // Connect to MongoDB
-connectDB();
+// connectDB();
 
 // Use route files
 app.get("/test", (req, res) => {
   res.json({ message: "Hello World" });
 });
-app.use("/auth", authRoutes);
-app.use("/", listRoutes);
+// app.use("/auth", authRoutes);
+// app.use("/", listRoutes);
 
 module.exports.handler = serverless(app);
