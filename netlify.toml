@@ -6,6 +6,9 @@
 [functions]
   directory = "functions"
 
+  [functions."api"]
+  included_files = ["./functions/**", "./src/**"]
+
 [[redirects]]
   from = "/*"
   to = "/.netlify/functions/api/:splat"

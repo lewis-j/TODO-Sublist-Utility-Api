@@ -47,6 +47,9 @@ app.use(
 // Use route files
 app.get("/test", (req, res) => {
   res.json({ message: "Hello World" });
+  app.use("*", (req, res) => {
+    res.status(404).json({ message: "Route not found", path: req.url });
+  });
 });
 // app.use("/auth", authRoutes);
 // app.use("/", listRoutes);
