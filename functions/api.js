@@ -1,27 +1,52 @@
 const express = require("express");
 const serverless = require("serverless-http");
+const session = require("express-session");
+const cors = require("cors");
+const connectDB = require("./utils/connectDB");
+const dotenv = require("dotenv");
+dotenv.config();
+require("isomorphic-fetch");
+const mainRoutes = require("../src/routes/mainRoutes");
 
 const app = express();
 
-// Logging middleware
-app.use((req, res, next) => {
-  console.log(`Received request: ${req.method} ${req.url}`);
-  next();
-});
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      const allowedOrigins = [
+        "https://mtodo-utility.netlify.app",
+        "https://mtodo-utility.netlify.app/",
+        "https://todo-utility.netlify.app",
+        "https://todo-utility.netlify.app/",
+        "http://localhost:5173",
+        // Include your local development URL if needed
+        "http://localhost:5173",
+      ];
+      if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true,
+  })
+);
+app.use(express.json());
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET || "your-secret-key",
+    resave: false,
+    saveUninitialized: false,
+  })
+);
 
-app.get("/.netlify/functions/api", (req, res) => {
-  console.log("Root route hit");
-  res.json({ message: "Hello from the API root!" });
-});
+// Connect to MongoDB
+connectDB();
 
-app.get("/.netlify/functions/api/test", (req, res) => {
-  console.log("Test route hit");
-  res.json({ message: "Hello from the test route!" });
-});
-
-app.use("*", (req, res) => {
-  console.log(`404 for ${req.url}`);
-  res.status(404).json({ error: "Not Found", path: req.url });
+// Use route files
+app.use("/.netlify/functions/api", mainRoutes);
+app.use("/test", (req, res) => {
+  res.json({ message: "Hello World" });
 });
 
 module.exports.handler = serverless(app);

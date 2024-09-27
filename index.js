@@ -37,10 +37,6 @@ mongoose
     process.exit(1);
   });
 
-// Use route files
-app.get("/test", (req, res) => {
-  res.json({ message: "Hello World" });
-});
 app.use("/auth", authRoutes);
 app.use("/", listRoutes);
 
