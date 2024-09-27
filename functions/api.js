@@ -15,14 +15,10 @@ app.use(
     origin: (origin, callback) => {
       const allowedOrigins = [
         "https://mtodo-utility.netlify.app",
-        "https://mtodo-utility.netlify.app/",
         "https://todo-utility.netlify.app",
-        "https://todo-utility.netlify.app/",
-        "http://localhost:5173",
-        // Include your local development URL if needed
         "http://localhost:5173",
       ];
-      if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+      if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
         callback(new Error("Not allowed by CORS"));
