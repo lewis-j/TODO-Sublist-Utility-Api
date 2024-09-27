@@ -1,6 +1,6 @@
-import express from "express";
-import authRoutes from "./authRoutes.js";
-import listRoutes from "./listRoutes.js";
+const express = require("express");
+const authRoutes = require("./authRoutes.js");
+const listRoutes = require("./listRoutes.js");
 
 const mainRoutes = express.Router();
 mainRoutes.use("/auth", authRoutes);
