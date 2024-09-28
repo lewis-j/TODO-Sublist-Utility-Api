@@ -24,6 +24,7 @@ router.get("/login", (req, res) => {
   msalClient
     .getAuthCodeUrl(authCodeUrlParameters)
     .then((url) => {
+      console.log("redirect url", url);
       res.redirect(url);
     })
     .catch((error) => console.log(JSON.stringify(error)));
