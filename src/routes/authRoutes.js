@@ -40,6 +40,7 @@ router.get("/callback", (req, res) => {
   msalClient
     .acquireTokenByCode(tokenRequest)
     .then((response) => {
+      console.log("response", response);
       req.session.accessToken = response.accessToken;
       res.redirect(process.env.FRONTEND_URL);
     })
