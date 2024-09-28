@@ -11,12 +11,6 @@ const mainRoutes = require("../src/routes/mainRoutes");
 
 const app = express();
 
-// Ensure you have a MongoDB connection
-mongoose.connect(process.env.MONGODB_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
-
 app.use(
   cors({
     origin: (origin, callback) => {
@@ -36,6 +30,9 @@ app.use(
 );
 app.use(express.json());
 
+// Connect to MongoDB
+connectDB();
+
 // Set up session with MongoDB store
 app.use(
   session({
@@ -54,9 +51,6 @@ app.use(
     },
   })
 );
-
-// Connect to MongoDB
-connectDB();
 
 // Use route files
 app.use("/.netlify/functions/api", mainRoutes);
