@@ -5,6 +5,7 @@ const List = require("../models/List"); // Assuming you'll create this model fil
 
 // Middleware to check if user is authenticated with Microsoft
 const isMicrosoftAuthenticated = (req, res, next) => {
+  console.log("req.session", req.session);
   if (!req.session.accessToken || !req.session.userId) {
     return res
       .status(401)
@@ -153,7 +154,6 @@ router.get("/todo/lists", isMicrosoftAuthenticated, async (req, res) => {
     });
 
     const result = await client.api("/me/todo/lists").get();
-    console.log("microsoft results", result);
 
     res.json(result.value);
   } catch (error) {

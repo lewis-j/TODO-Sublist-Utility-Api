@@ -30,32 +30,41 @@ app.use(
 );
 app.use(express.json());
 
-// Connect to MongoDB
-connectDB();
+// Connect to MongoDB and set up the app only after successful connection
+const setupApp = async () => {
+  await connectDB();
 
-// Set up session with MongoDB store
-app.use(
-  session({
-    secret: process.env.SESSION_SECRET,
-    resave: false,
-    saveUninitialized: false,
-    store: MongoStore.create({
-      mongoUrl: process.env.MONGODB_DATABASE,
-      ttl: 14 * 24 * 60 * 60, // = 14 days. Default
-    }),
-    cookie: {
-      secure: true, // Always use secure cookies in Netlify Functions
-      httpOnly: true, // Helps prevent XSS attacks
-      sameSite: "none", // Allows cross-origin cookies
-      maxAge: 14 * 24 * 60 * 60 * 1000, // 14 days
-    },
-  })
-);
+  // Set up session with MongoDB store
+  app.use(
+    session({
+      secret: process.env.SESSION_SECRET,
+      resave: false,
+      saveUninitialized: false,
+      store: MongoStore.create({
+        mongoUrl: process.env.MONGODB_DATABASE,
+        ttl: 14 * 24 * 60 * 60, // = 14 days. Default
+      }),
+      cookie: {
+        secure: true, // Always use secure cookies in Netlify Functions
+        httpOnly: true, // Helps prevent XSS attacks
+        sameSite: "none", // Allows cross-origin cookies
+        maxAge: 14 * 24 * 60 * 60 * 1000, // 14 days
+      },
+    })
+  );
 
-// Use route files
-app.use("/.netlify/functions/api", mainRoutes);
-app.use("/test", (req, res) => {
-  res.json({ message: "Hello World" });
-});
+  // Use route files
+  app.use("/.netlify/functions/api", mainRoutes);
+  app.use("/test", (req, res) => {
+    res.json({ message: "Hello World" });
+  });
 
-module.exports.handler = serverless(app);
+  return app;
+};
+
+// Export the serverless function
+module.exports.handler = async (event, context) => {
+  const app = await setupApp();
+  const handler = serverless(app);
+  return handler(event, context);
+};
