@@ -5,7 +5,7 @@ const List = require("../models/List"); // Assuming you'll create this model fil
 
 // Middleware to check if user is authenticated with Microsoft
 const isMicrosoftAuthenticated = (req, res, next) => {
-  if (!req.session.accessToken) {
+  if (!req.session.accessToken || !req.session.userId) {
     return res
       .status(401)
       .json({ message: "Not authenticated with Microsoft" });
@@ -14,9 +14,9 @@ const isMicrosoftAuthenticated = (req, res, next) => {
 };
 
 // Local MongoDB list operations
-router.get("/lists", async (req, res) => {
+router.get("/lists", isMicrosoftAuthenticated, async (req, res) => {
   try {
-    const lists = await List.find();
+    const lists = await List.find({ userId: req.session.userId });
     res.json(lists);
   } catch (err) {
     console.error("Error fetching lists:", err);
@@ -24,7 +24,7 @@ router.get("/lists", async (req, res) => {
   }
 });
 
-router.post("/lists", async (req, res) => {
+router.post("/lists", isMicrosoftAuthenticated, async (req, res) => {
   if (
     !req.body.name ||
     typeof req.body.name !== "string" ||
@@ -38,6 +38,7 @@ router.post("/lists", async (req, res) => {
   const list = new List({
     name: req.body.name.trim(),
     items: [],
+    userId: req.session.userId,
   });
 
   try {
@@ -49,7 +50,7 @@ router.post("/lists", async (req, res) => {
   }
 });
 
-router.put("/lists/:id", async (req, res) => {
+router.put("/lists/:id", isMicrosoftAuthenticated, async (req, res) => {
   if (
     !req.body.name ||
     typeof req.body.name !== "string" ||
@@ -61,8 +62,8 @@ router.put("/lists/:id", async (req, res) => {
   }
 
   try {
-    const list = await List.findByIdAndUpdate(
-      req.params.id,
+    const list = await List.findOneAndUpdate(
+      { _id: req.params.id, userId: req.session.userId },
       { name: req.body.name.trim() },
       { new: true }
     );
@@ -74,9 +75,12 @@ router.put("/lists/:id", async (req, res) => {
   }
 });
 
-router.delete("/lists/:id", async (req, res) => {
+router.delete("/lists/:id", isMicrosoftAuthenticated, async (req, res) => {
   try {
-    const list = await List.findByIdAndDelete(req.params.id);
+    const list = await List.findOneAndDelete({
+      _id: req.params.id,
+      userId: req.session.userId,
+    });
     if (!list) return res.status(404).json({ message: "List not found" });
     res.status(204).send();
   } catch (err) {
@@ -85,7 +89,7 @@ router.delete("/lists/:id", async (req, res) => {
   }
 });
 
-router.post("/lists/:id/items", async (req, res) => {
+router.post("/lists/:id/items", isMicrosoftAuthenticated, async (req, res) => {
   if (
     !req.body.name ||
     typeof req.body.name !== "string" ||
@@ -97,7 +101,10 @@ router.post("/lists/:id/items", async (req, res) => {
   }
 
   try {
-    const list = await List.findById(req.params.id);
+    const list = await List.findOne({
+      _id: req.params.id,
+      userId: req.session.userId,
+    });
     if (!list) return res.status(404).json({ message: "List not found" });
 
     const newItem = { name: req.body.name.trim() };
@@ -110,24 +117,31 @@ router.post("/lists/:id/items", async (req, res) => {
   }
 });
 
-router.delete("/lists/:listId/items/:itemId", async (req, res) => {
-  try {
-    const list = await List.findById(req.params.listId);
-    if (!list) return res.status(404).json({ message: "List not found" });
+router.delete(
+  "/lists/:listId/items/:itemId",
+  isMicrosoftAuthenticated,
+  async (req, res) => {
+    try {
+      const list = await List.findOne({
+        _id: req.params.listId,
+        userId: req.session.userId,
+      });
+      if (!list) return res.status(404).json({ message: "List not found" });
 
-    const item = list.items.id(req.params.itemId);
-    if (!item) return res.status(404).json({ message: "Item not found" });
+      const item = list.items.id(req.params.itemId);
+      if (!item) return res.status(404).json({ message: "Item not found" });
 
-    item.remove();
-    await list.save();
-    res.status(204).send();
-  } catch (err) {
-    console.error("Error removing item from list:", err);
-    res
-      .status(500)
-      .json({ message: "Error removing item from list in database" });
+      item.remove();
+      await list.save();
+      res.status(204).send();
+    } catch (err) {
+      console.error("Error removing item from list:", err);
+      res
+        .status(500)
+        .json({ message: "Error removing item from list in database" });
+    }
   }
-});
+);
 
 // Microsoft To Do operations
 router.get("/todo/lists", isMicrosoftAuthenticated, async (req, res) => {

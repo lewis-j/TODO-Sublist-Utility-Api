@@ -42,6 +42,7 @@ router.get("/callback", (req, res) => {
     .then((response) => {
       console.log("response", response);
       req.session.accessToken = response.accessToken;
+      req.session.userId = response.account.homeAccountId;
       res.redirect(process.env.FRONTEND_URL);
     })
     .catch((error) => console.log(JSON.stringify(error)));
