@@ -1,6 +1,7 @@
 const express = require("express");
 const serverless = require("serverless-http");
 const session = require("express-session");
+const MongoStore = require("connect-mongo");
 const cors = require("cors");
 const connectDB = require("./utils/connectDB");
 const dotenv = require("dotenv");
@@ -9,6 +10,12 @@ require("isomorphic-fetch");
 const mainRoutes = require("../src/routes/mainRoutes");
 
 const app = express();
+
+// Ensure you have a MongoDB connection
+mongoose.connect(process.env.MONGODB_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+});
 
 app.use(
   cors({
@@ -28,11 +35,23 @@ app.use(
   })
 );
 app.use(express.json());
+
+// Set up session with MongoDB store
 app.use(
   session({
-    secret: process.env.SESSION_SECRET || "your-secret-key",
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
+    store: MongoStore.create({
+      mongoUrl: process.env.MONGODB_DATABASE,
+      ttl: 14 * 24 * 60 * 60, // = 14 days. Default
+    }),
+    cookie: {
+      secure: true, // Always use secure cookies in Netlify Functions
+      httpOnly: true, // Helps prevent XSS attacks
+      sameSite: "none", // Allows cross-origin cookies
+      maxAge: 14 * 24 * 60 * 60 * 1000, // 14 days
+    },
   })
 );
 
