@@ -139,10 +139,17 @@ router.delete(
       });
       if (!list) return res.status(404).json({ message: "List not found" });
 
-      const item = list.items.id(req.params.itemId);
-      if (!item) return res.status(404).json({ message: "Item not found" });
+      // Find the index of the item to remove
+      const itemIndex = list.items.findIndex(
+        (item) => item._id.toString() === req.params.itemId
+      );
+      if (itemIndex === -1)
+        return res.status(404).json({ message: "Item not found" });
 
-      item.remove();
+      // Remove the item using splice
+      list.items.splice(itemIndex, 1);
+
+      // Save the updated list
       await list.save();
       res.status(204).send();
     } catch (err) {
