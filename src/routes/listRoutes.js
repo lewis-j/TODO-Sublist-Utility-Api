@@ -5,12 +5,19 @@ const List = require("../models/List"); // Assuming you'll create this model fil
 
 // Middleware to check if user is authenticated with Microsoft
 const isMicrosoftAuthenticated = (req, res, next) => {
-  console.log("req.session", req.session);
+  console.log("isMicrosoftAuthenticated middleware:");
+  console.log("Session ID:", req.sessionID);
+  console.log("Full session:", JSON.stringify(req.session, null, 2));
+  console.log("Access Token:", req.session.accessToken ? "Present" : "Missing");
+  console.log("User ID:", req.session.userId ? "Present" : "Missing");
+
   if (!req.session.accessToken || !req.session.userId) {
+    console.log("Authentication failed: Missing access token or user ID");
     return res
       .status(401)
       .json({ message: "Not authenticated with Microsoft" });
   }
+  console.log("Authentication successful");
   next();
 };
 
