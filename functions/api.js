@@ -4,6 +4,7 @@ const session = require("express-session");
 const MongoStore = require("connect-mongo");
 const cors = require("cors");
 const connectDB = require("./utils/connectDB");
+const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 dotenv.config();
 require("isomorphic-fetch");
@@ -41,13 +42,13 @@ const setupApp = async () => {
       resave: false,
       saveUninitialized: false,
       store: MongoStore.create({
-        mongoUrl: process.env.MONGODB_DATABASE,
+        client: mongoose.connection.getClient(),
         ttl: 14 * 24 * 60 * 60, // = 14 days. Default
       }),
       cookie: {
-        secure: true, // Always use secure cookies in Netlify Functions
+        secure: process.env.NODE_ENV === "production", // Use secure cookies in production
         httpOnly: true, // Helps prevent XSS attacks
-        sameSite: "none", // Allows cross-origin cookies
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", // Allows cross-origin cookies in production
         maxAge: 14 * 24 * 60 * 60 * 1000, // 14 days
       },
     })
@@ -64,7 +65,15 @@ const setupApp = async () => {
 
 // Export the serverless function
 module.exports.handler = async (event, context) => {
-  const app = await setupApp();
-  const handler = serverless(app);
-  return handler(event, context);
+  try {
+    const app = await setupApp();
+    const handler = serverless(app);
+    return handler(event, context);
+  } catch (error) {
+    console.error("Error in serverless function:", error);
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ error: "Internal Server Error" }),
+    };
+  }
 };
