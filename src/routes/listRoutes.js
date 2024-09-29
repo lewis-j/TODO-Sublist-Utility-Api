@@ -6,6 +6,7 @@ const jwt = require("jsonwebtoken");
 
 // Middleware to check if user is authenticated with Microsoft
 const isMicrosoftAuthenticated = (req, res, next) => {
+  console.log("req.cookies", req.cookies);
   const token = req.cookies.auth_token;
 
   if (!token) {
@@ -26,7 +27,7 @@ const isMicrosoftAuthenticated = (req, res, next) => {
 // Local MongoDB list operations
 router.get("/lists", isMicrosoftAuthenticated, async (req, res) => {
   try {
-    const lists = await List.find({ userId: req.session.userId });
+    const lists = await List.find({ userId: req.user.userId });
     res.json(lists);
   } catch (err) {
     console.error("Error fetching lists:", err);
@@ -48,7 +49,7 @@ router.post("/lists", isMicrosoftAuthenticated, async (req, res) => {
   const list = new List({
     name: req.body.name.trim(),
     items: [],
-    userId: req.session.userId,
+    userId: req.user.userId,
   });
 
   try {
@@ -73,7 +74,7 @@ router.put("/lists/:id", isMicrosoftAuthenticated, async (req, res) => {
 
   try {
     const list = await List.findOneAndUpdate(
-      { _id: req.params.id, userId: req.session.userId },
+      { _id: req.params.id, userId: req.user.userId },
       { name: req.body.name.trim() },
       { new: true }
     );
@@ -89,7 +90,7 @@ router.delete("/lists/:id", isMicrosoftAuthenticated, async (req, res) => {
   try {
     const list = await List.findOneAndDelete({
       _id: req.params.id,
-      userId: req.session.userId,
+      userId: req.user.userId,
     });
     if (!list) return res.status(404).json({ message: "List not found" });
     res.status(204).send();
@@ -113,7 +114,7 @@ router.post("/lists/:id/items", isMicrosoftAuthenticated, async (req, res) => {
   try {
     const list = await List.findOne({
       _id: req.params.id,
-      userId: req.session.userId,
+      userId: req.user.userId,
     });
     if (!list) return res.status(404).json({ message: "List not found" });
 
@@ -134,7 +135,7 @@ router.delete(
     try {
       const list = await List.findOne({
         _id: req.params.listId,
-        userId: req.session.userId,
+        userId: req.user.userId,
       });
       if (!list) return res.status(404).json({ message: "List not found" });
 
@@ -158,7 +159,7 @@ router.get("/todo/lists", isMicrosoftAuthenticated, async (req, res) => {
   try {
     const client = Client.init({
       authProvider: (done) => {
-        done(null, req.session.accessToken);
+        done(null, req.user.accessToken);
       },
     });
 
@@ -181,7 +182,7 @@ router.post(
     try {
       const client = Client.init({
         authProvider: (done) => {
-          done(null, req.session.accessToken);
+          done(null, req.user.accessToken);
         },
       });
 
