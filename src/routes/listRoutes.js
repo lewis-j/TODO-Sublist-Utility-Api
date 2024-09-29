@@ -2,23 +2,25 @@ const express = require("express");
 const { Client } = require("@microsoft/microsoft-graph-client");
 const router = express.Router();
 const List = require("../models/List"); // Assuming you'll create this model file
+const jwt = require("jsonwebtoken");
 
 // Middleware to check if user is authenticated with Microsoft
 const isMicrosoftAuthenticated = (req, res, next) => {
-  console.log("isMicrosoftAuthenticated middleware:");
-  console.log("Session ID:", req.sessionID);
-  console.log("Full session:", JSON.stringify(req.session, null, 2));
-  console.log("Access Token:", req.session.accessToken ? "Present" : "Missing");
-  console.log("User ID:", req.session.userId ? "Present" : "Missing");
+  const token = req.cookies.auth_token;
 
-  if (!req.session.accessToken || !req.session.userId) {
-    console.log("Authentication failed: Missing access token or user ID");
+  if (!token) {
     return res
       .status(401)
       .json({ message: "Not authenticated with Microsoft" });
   }
-  console.log("Authentication successful");
-  next();
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = decoded;
+    next();
+  } catch (error) {
+    return res.status(401).json({ message: "Invalid or expired token" });
+  }
 };
 
 // Local MongoDB list operations

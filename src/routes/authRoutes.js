@@ -2,6 +2,7 @@ const express = require("express");
 const msal = require("@azure/msal-node");
 const router = express.Router();
 const dotenv = require("dotenv");
+const jwt = require("jsonwebtoken");
 dotenv.config();
 
 // MSAL configuration
@@ -40,23 +41,21 @@ router.get("/callback", (req, res) => {
   msalClient
     .acquireTokenByCode(tokenRequest)
     .then((response) => {
-      console.log(
-        "Microsoft authentication response:",
-        JSON.stringify(response, null, 2)
+      const token = jwt.sign(
+        {
+          accessToken: response.accessToken,
+          userId: response.account.homeAccountId,
+        },
+        process.env.JWT_SECRET,
+        { expiresIn: "14d" }
       );
-      req.session.accessToken = response.accessToken;
-      req.session.userId = response.account.homeAccountId;
-      req.session.save((err) => {
-        if (err) {
-          console.error("Error saving session:", err);
-          return res.status(500).json({ message: "Error saving session" });
-        }
-        console.log(
-          "Session after setting:",
-          JSON.stringify(req.session, null, 2)
-        );
-        res.redirect(process.env.FRONTEND_URL);
+      res.cookie("auth_token", token, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "none",
+        maxAge: 14 * 24 * 60 * 60 * 1000, // 14 days
       });
+      res.redirect(process.env.FRONTEND_URL);
     })
     .catch((error) => {
       console.error("Error in Microsoft authentication:", error);
