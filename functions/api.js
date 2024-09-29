@@ -46,9 +46,9 @@ const setupApp = async () => {
         ttl: 14 * 24 * 60 * 60, // = 14 days. Default
       }),
       cookie: {
-        secure: process.env.NODE_ENV === "production", // Use secure cookies in production
-        httpOnly: true, // Helps prevent XSS attacks
-        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", // Allows cross-origin cookies in production
+        secure: process.env.NODE_ENV === "production", // Only use secure in production
+        httpOnly: true,
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
         maxAge: 14 * 24 * 60 * 60 * 1000, // 14 days
       },
     })

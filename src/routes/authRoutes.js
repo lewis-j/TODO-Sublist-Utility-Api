@@ -40,12 +40,28 @@ router.get("/callback", (req, res) => {
   msalClient
     .acquireTokenByCode(tokenRequest)
     .then((response) => {
-      console.log("response", response);
+      console.log(
+        "Microsoft authentication response:",
+        JSON.stringify(response, null, 2)
+      );
       req.session.accessToken = response.accessToken;
       req.session.userId = response.account.homeAccountId;
-      res.redirect(process.env.FRONTEND_URL);
+      req.session.save((err) => {
+        if (err) {
+          console.error("Error saving session:", err);
+          return res.status(500).json({ message: "Error saving session" });
+        }
+        console.log(
+          "Session after setting:",
+          JSON.stringify(req.session, null, 2)
+        );
+        res.redirect(process.env.FRONTEND_URL);
+      });
     })
-    .catch((error) => console.log(JSON.stringify(error)));
+    .catch((error) => {
+      console.error("Error in Microsoft authentication:", error);
+      res.status(500).json({ message: "Authentication failed" });
+    });
 });
 
 module.exports = router;
