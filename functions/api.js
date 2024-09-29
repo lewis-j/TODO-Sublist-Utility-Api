@@ -31,11 +31,26 @@ app.use(
 app.use(express.json());
 app.use(cookieParser());
 
-// Connect to MongoDB
-connectDB();
+// Wrap the serverless handler in an async function
+const handler = async (event, context) => {
+  // Connect to MongoDB before handling any requests
+  try {
+    await connectDB();
+  } catch (error) {
+    console.error("Failed to connect to MongoDB:", error);
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ error: "Internal Server Error" }),
+    };
+  }
 
-// Use route files
-app.use("/.netlify/functions/api", mainRoutes);
+  // Use route files
+  app.use("/.netlify/functions/api", mainRoutes);
 
-// Export the serverless function
-module.exports.handler = serverless(app);
+  // Create and return the serverless handler
+  const serverlessHandler = serverless(app);
+  return serverlessHandler(event, context);
+};
+
+// Export the wrapped handler
+module.exports.handler = handler;
